@@ -21,4 +21,10 @@ request.onupgradeneeded = (event) => {
     db.createObjectStore("pending", { autoIncrement: true });
   };
   
- 
+  //Checks if the app is online before reading from the db
+  request.onsuccess = (event) => {
+    db = event.target.result;
+    if (navigator.onLine) {
+      checkDatabase();
+    }
+  };
