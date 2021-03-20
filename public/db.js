@@ -28,3 +28,18 @@ request.onupgradeneeded = (event) => {
       checkDatabase();
     }
   };
+  
+  request.onerror = (event) => {
+    console.log("Woops! " + event.target.errorCode);
+  };
+  
+  let saveRecord = (record) => {
+    //Creates a transaction on the pending db with readwrite access
+    const transaction = db.transaction(["pending"], "readwrite");
+  
+    //Accesses the pending object store
+    const store = transaction.objectStore("pending");
+  
+    //Adds a record to the store with the add method.
+    store.add(record);
+  };
