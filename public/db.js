@@ -43,3 +43,40 @@ request.onupgradeneeded = (event) => {
     //Adds a record to the store with the add method.
     store.add(record);
   };
+
+  let checkDatabase = () => {
+    //Opens a transaction on the pending db
+    const transaction = db.transaction(["pending"], "readwrite");
+    //Accesses the pending object store
+    const store = transaction.objectStore("pending");
+    //Gets all records from the store and sets them to a variable
+    const getAll = store.getAll();
+  
+    getAll.onsuccess = () => {
+      if (getAll.result.length > 0) {
+        fetch("/api/transaction/bulk", {
+          method: "POST",
+          body: JSON.stringify(getAll.result),
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then(() => {
+            //If successful, open a transaction on the pending db
+            const transaction = db.transaction(["pending"], "readwrite");
+  
+            //Accesses the pending object store
+            const store = transaction.objectStore("pending");
+  
+            //Clears all items in the store
+            store.clear();
+          });
+      }
+    };
+  };
+  
+  //Listens out for the app coming back online
+  window.addEventListener("online", checkDatabase);
+  
